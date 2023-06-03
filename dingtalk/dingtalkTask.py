@@ -1,11 +1,12 @@
 # coding: utf-8
+import datetime
 from time import sleep
 
 import uiautomator2 as u2
 
 from dingsend import dingrobot
 
-d = u2.connect('CMLFPZCU596HH6Z9')
+d = u2.connect('192.168.0.103')
 appPackage = "com.alibaba.android.rimet:id/"
 
 
@@ -29,6 +30,11 @@ def open_dingtalk(account="13507922019", passwd="dj1522833718"):
 
 
 def switch_organizations():
+    contentPanel = d(resourceId="com.alibaba.android.rimet:id/contentPanel").wait(timeout=15)
+    if contentPanel:
+        d(resourceId="android:id/button2").click()
+    else:
+        pass
     # 组织名
     d(resourceId=appPackage + 'tv_org_name').wait()
     tv_org_name = d(resourceId=appPackage + 'tv_org_name').get_text()
@@ -125,6 +131,8 @@ def Answer_questions_safely():
             d(resourceId="com.alibaba.android.rimet:id/back_icon").click()
             d(resourceId="android:id/button2").wait()
             d(resourceId="android:id/button2").click()
+            d(resourceId="com.alibaba.android.rimet:id/close_layout").wait()
+            d(resourceId="com.alibaba.android.rimet:id/close_layout").click()
             return '今日已作答，请明日再答题！'
         elif d(text="您已完成今日作答，得分100，再接再厉！").exists:
             d(resourceId="com.alibaba.android.rimet:id/back_icon").wait()
@@ -183,8 +191,10 @@ def Security_self_check():
     d.xpath('//*[@text="提交"]').click()
     while True:
         if d.xpath('//*[@text="此项内容已存在，不允许重复提交"]').exists:
+            print('今日已自查，请明日再自查！')
             return '今日已自查，请明日再自查！'
         elif d.xpath('//*[@text="提交成功"]').exists:
+            print('今日自查完成！')
             return '今日自查完成！'
         else:
             pass
@@ -195,14 +205,20 @@ def dingtalk_task():
     open_dingtalk()
     # 切换组织判断
     switch_organizations()
-    # 安全答题
-    Answer = Answer_questions_safely()
-    dingrobot('安全答题', Answer, pic='https://img2.baidu.com/it/u=2879694884,3288412488&fm=253')
+    weekno = datetime.datetime.today().weekday()
+    if weekno >= 5:
+        pass
+    else:
+        # 安全答题
+        Answer = Answer_questions_safely()
+        dingrobot('安全答题', Answer, pic='https://img2.baidu.com/it/u=2879694884,3288412488&fm=253')
     # 安全自查
     Security = Security_self_check()
-    dingrobot('安全自查', Security, pic='https://img2.baidu.com/it/u=2879694884,3288412488&fm=253')
+    dingrobot('安全自查', Security, pic='https://img2.baidu.com/it/u=2507520708,866929612&fm=253&fmt=auto&app=138&f=JPEG?w=1194&h=500')
 
     d.app_stop("com.alibaba.android.rimet")  # 停止应用
 
 
 dingtalk_task()
+
+
